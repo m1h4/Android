@@ -151,8 +151,13 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
     private void refreshCustomApplications() {
         mApplications.clear();
 
-        String[] customs = Settings.System.getString(getContentResolver(),
-                NOTIFICATION_LIGHT_PULSE_CUSTOM_VALUES).split("\\|", -1);
+        String customValues = Settings.System.getString(getContentResolver(),
+                NOTIFICATION_LIGHT_PULSE_CUSTOM_VALUES);
+
+        if (customValues == null)
+            customValues = "";
+
+        String[] customs = customValues.split("\\|", -1);
 
         for (String custom : customs) {
             String[] app = custom.split("=", -1);
@@ -177,6 +182,9 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
         String customValues = Settings.System.getString(getContentResolver(),
                 NOTIFICATION_LIGHT_PULSE_CUSTOM_VALUES);
 
+        if (customValues == null)
+            customValues = "";
+
         customValues = customValues.trim();
 
         if (customValues.length() != 0 && !customValues.endsWith("|"))
@@ -193,6 +201,9 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
     public void removeCustomApplication(String packageName) {
         String customValues = Settings.System.getString(getContentResolver(),
                 NOTIFICATION_LIGHT_PULSE_CUSTOM_VALUES);
+
+        if (customValues == null)
+            customValues = "";
 
         StringBuilder newValues = new StringBuilder();
 
