@@ -169,6 +169,7 @@
         <item>Long|2000</item>
         <item>Very long|5000</item>
         <item>Extremely long|10000</item>
+        <item>None|0</item>
     </string-array>
         <string name="light_color">LIGHT COLOR</string>
         <string name="light_off_duration">LIGHT OFF DURATION</string>

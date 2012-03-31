@@ -142,19 +142,23 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 	{
 		mApplications.clear();
 
-		String[] customs = Settings.System.getString(getContentResolver(), NOTIFICATION_LIGHT_PULSE_CUSTOM_VALUES).split("\\|");
+		String[] customs = Settings.System.getString(getContentResolver(), NOTIFICATION_LIGHT_PULSE_CUSTOM_VALUES).split("\\|", -1);
 
 		for(String custom : customs)
 		{
-			String[] app = custom.split("=");
+			String[] app = custom.split("=", -1);
 			if(app.length != 2)
 				continue;
 
-			String[] values = app[1].split(";");
+			String[] values = app[1].split(";", -1);
 			if(values.length != 3)
 				continue;
 
-			mApplications.add(new Application(app[0], Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2])));
+			try
+			{
+				mApplications.add(new Application(app[0], Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2])));
+			}
+			catch(NumberFormatException e) {}
 		}
 
 		mListAdapter.notifyDataSetChanged();
@@ -164,7 +168,9 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 	{
 		String customValues = Settings.System.getString(getContentResolver(), NOTIFICATION_LIGHT_PULSE_CUSTOM_VALUES);
 
-		if(!customValues.trim().endsWith("|"))
+		customValues = customValues.trim();
+		
+		if(customValues.length() != 0 && !customValues.endsWith("|"))
 			customValues += "|";
 
 		customValues += packageName + "=0;-1;-1";
@@ -180,9 +186,9 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 
 		StringBuilder newValues = new StringBuilder();
 
-		for(String custom : customValues.split("\\|"))
+		for(String custom : customValues.split("\\|", -1))
 		{
-			String[] app = custom.split("=");
+			String[] app = custom.split("=", -1);
 			if(app.length != 2)
 				continue;
 
@@ -207,7 +213,7 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 
 		for(String entry : getResources().getStringArray(R.array.times))
 		{
-			String[] values = entry.split("\\|");
+			String[] values = entry.split("\\|", -1);
 
 			if(values.length != 2)
 				continue;
@@ -226,7 +232,7 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 
 		for(String entry : getResources().getStringArray(R.array.colors))
 		{
-			String[] values = entry.split("\\|");
+			String[] values = entry.split("\\|", -1);
 
 			if(values.length != 2)
 				continue;
@@ -535,7 +541,12 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 		StringBuilder builder = new StringBuilder();
 
 		for(Application a : mApplications)
-			builder.append(a.name).append("=").append(a.color).append(";").append(a.timeon).append(";").append(a.timeoff).append("|");
+		{
+			if(builder.length() != 0)
+				builder.append("|");
+			
+			builder.append(a.name).append("=").append(a.color).append(";").append(a.timeon).append(";").append(a.timeoff);
+		}
 
 		Settings.System.putString(getContentResolver(), NOTIFICATION_LIGHT_PULSE_CUSTOM_VALUES, builder.toString());
 		refreshCustomApplications();
@@ -557,7 +568,7 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 
 			for(String entry : getResources().getStringArray(timesArrayResource))
 			{
-				String[] values = entry.split("\\|");
+				String[] values = entry.split("\\|", -1);
 
 				if(values.length != 2)
 					continue;
@@ -648,7 +659,7 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 
 			for(String entry : getResources().getStringArray(colorsArrayResource))
 			{
-				String[] values = entry.split("\\|");
+				String[] values = entry.split("\\|", -1);
 
 				if(values.length != 2)
 					continue;
