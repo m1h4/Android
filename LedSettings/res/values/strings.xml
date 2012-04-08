@@ -5,9 +5,9 @@
     <string name="category_applications">Applications</string>
     <string name="app_name">Led Settings</string>
     <string name="default_value">Default values</string>
-    <string name="default_package">Can be overriden by custom</string>
+    <string name="default_package">%1$s pusle in %2$s intervals</string>
     <string name="per_application">Per application values</string>
-    <string name="per_application_subtitle">Use custom values</string>
+    <string name="per_application_subtitle">Use custom app values</string>
     <string name="menu_add">Add Application</string>
     <string name="choose_app">Choose Application</string>
     <string name="edit_app">Edit Application</string>

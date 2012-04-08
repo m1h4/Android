@@ -110,8 +110,12 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
     }
 
     private void refreshCustomEnabled() {
-        ((Switch) findViewById(R.id.checkedViewCustom)).setChecked(Settings.System.getInt(
-                getContentResolver(), NOTIFICATION_LIGHT_PULSE_CUSTOM_ENABLE, 0) == 1);
+        boolean customEnabled = Settings.System.getInt(
+                getContentResolver(), NOTIFICATION_LIGHT_PULSE_CUSTOM_ENABLE, 0) == 1;
+        
+        ((Switch) findViewById(R.id.checkedViewCustom)).setChecked(customEnabled);
+        
+        findViewById(android.R.id.list).setEnabled(customEnabled);
     }
 
     private void refreshDefault() {
@@ -125,10 +129,10 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
         View def = findViewById(R.id.default_color);
 
         ((TextView) def.findViewById(R.id.textViewName)).setText(R.string.default_value);
-        ((TextView) def.findViewById(R.id.textViewPackage)).setText(R.string.default_package);
+        ((TextView) def.findViewById(R.id.textViewPackage)).setText(getResources().getString(R.string.default_package, mapTimeValue(mTimeOn), mapTimeValue(mTimeOff).toLowerCase()));
         ((View) def.findViewById(R.id.textViewColorValue)).setBackgroundColor(0xFF000000 + mColor);
-        ((TextView) def.findViewById(R.id.textViewTimeOnValue)).setText(mapTimeValue(mTimeOn));
-        ((TextView) def.findViewById(R.id.textViewTimeOffValue)).setText(mapTimeValue(mTimeOff));
+        //((TextView) def.findViewById(R.id.textViewTimeOnValue)).setText(mapTimeValue(mTimeOn));
+        //((TextView) def.findViewById(R.id.textViewTimeOffValue)).setText(mapTimeValue(mTimeOff));
 
         def.setOnClickListener(new OnClickListener() {
 
@@ -230,15 +234,13 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
     private String mapTimeValue(Integer time) {
         if (time == Application.DEFAULT_TIME)
             return getString(R.string.default_time);
+        
+        String[] time_names = getResources().getStringArray(R.array.time_names);
+        String[] time_values = getResources().getStringArray(R.array.time_values);
 
-        for (String entry : getResources().getStringArray(R.array.times)) {
-            String[] values = entry.split("\\|", -1);
-
-            if (values.length != 2)
-                continue;
-
-            if (Integer.decode(values[1]).equals(time))
-                return values[0];
+        for (int i = 0; i < time_values.length; i++) {
+            if (Integer.decode(time_values[i]).equals(time))
+                return time_names[i];
         }
 
         return getString(R.string.custom_time);
@@ -248,14 +250,12 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
         if (color == Application.DEFAULT_COLOR)
             return getString(R.string.default_color);
 
-        for (String entry : getResources().getStringArray(R.array.colors)) {
-            String[] values = entry.split("\\|", -1);
+        String[] color_names = getResources().getStringArray(R.array.color_names);
+        String[] color_values = getResources().getStringArray(R.array.color_values);
 
-            if (values.length != 2)
-                continue;
-
-            if (Integer.decode(values[1]).equals(color))
-                return values[0];
+        for (int i = 0; i < color_values.length; i++) {
+            if (Integer.decode(color_values[i]).equals(color))
+                return color_names[i];
         }
 
         return getString(R.string.custom_color);
@@ -300,8 +300,8 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
                 holder.name = (TextView) view.findViewById(R.id.textViewName);
                 holder.pkg = (TextView) view.findViewById(R.id.textViewPackage);
                 holder.color = view.findViewById(R.id.textViewColorValue);
-                holder.timeon = (TextView) view.findViewById(R.id.textViewTimeOnValue);
-                holder.timeoff = (TextView) view.findViewById(R.id.textViewTimeOffValue);
+                //holder.timeon = (TextView) view.findViewById(R.id.textViewTimeOnValue);
+                //holder.timeoff = (TextView) view.findViewById(R.id.textViewTimeOffValue);
 
                 view.setTag(holder);
             } else
@@ -319,7 +319,8 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
             Application item = getItem(position);
 
             holder.name.setText(name);
-            holder.pkg.setText(item.name);
+            //holder.pkg.setText(item.name);
+            holder.pkg.setText(getResources().getString(R.string.default_package, mapTimeValue(item.timeon), mapTimeValue(item.timeoff).toLowerCase()));
 
             if (item.color == Application.DEFAULT_COLOR)
                 holder.color.setVisibility(View.GONE);
@@ -328,6 +329,7 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
                 holder.color.setVisibility(View.VISIBLE);
             }
 
+            /*
             if (item.timeon == Application.DEFAULT_TIME)
                 holder.timeon.setVisibility(View.INVISIBLE);
             else {
@@ -341,6 +343,7 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
                 holder.timeoff.setText(mapTimeValue(item.timeoff));
                 holder.timeoff.setVisibility(View.VISIBLE);
             }
+            */
 
             return view;
         }
@@ -353,9 +356,9 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 
         View color;
 
-        TextView timeon;
+        //TextView timeon;
 
-        TextView timeoff;
+        //TextView timeoff;
     }
 
     @Override
@@ -452,7 +455,7 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 
                 Spinner spinner = (Spinner) layout.findViewById(R.id.spinnerColors);
 
-                ColorSpinnerAdapter colorAdapter = new ColorSpinnerAdapter(R.array.colors, !defaul,
+                ColorSpinnerAdapter colorAdapter = new ColorSpinnerAdapter(R.array.color_names, R.array.color_values, !defaul,
                         bundle.getInt("color"));
 
                 spinner.setAdapter(colorAdapter);
@@ -461,7 +464,7 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 
                 spinner = (Spinner) layout.findViewById(R.id.spinnerTimeOn);
 
-                TimeSpinnerAdapter timeAdapter = new TimeSpinnerAdapter(R.array.times, !defaul,
+                TimeSpinnerAdapter timeAdapter = new TimeSpinnerAdapter(R.array.time_names, R.array.time_values, !defaul,
                         bundle.getInt("timeon"));
 
                 spinner.setAdapter(timeAdapter);
@@ -470,7 +473,7 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 
                 spinner = (Spinner) layout.findViewById(R.id.spinnerTimeOff);
 
-                timeAdapter = new TimeSpinnerAdapter(R.array.times, !defaul,
+                timeAdapter = new TimeSpinnerAdapter(R.array.time_names, R.array.time_values, !defaul,
                         bundle.getInt("timeoff"));
 
                 spinner.setAdapter(timeAdapter);
@@ -568,7 +571,7 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
     class TimeSpinnerAdapter extends BaseAdapter implements SpinnerAdapter {
         private ArrayList<Pair<String, Integer>> times;
 
-        public TimeSpinnerAdapter(int timesArrayResource, boolean defaul) {
+        public TimeSpinnerAdapter(int timeNamesResource,int timeValuesResource, boolean defaul) {
             times = new ArrayList<Pair<String, Integer>>();
 
             if (defaul) {
@@ -577,14 +580,11 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
                         getResources().getString(R.string.default_time), Application.DEFAULT_TIME));
             }
 
-            for (String entry : getResources().getStringArray(timesArrayResource)) {
-                String[] values = entry.split("\\|", -1);
+            String[] time_names = getResources().getStringArray(R.array.time_names);
+            String[] time_values = getResources().getStringArray(R.array.time_values);
 
-                if (values.length != 2)
-                    continue;
-
-                times.add(new Pair<String, Integer>(values[0], Integer.decode(values[1])));
-            }
+            for(int i = 0; i < time_values.length; ++i)
+                times.add(new Pair<String, Integer>(time_names[i], Integer.decode(time_values[i])));
         }
 
         /**
@@ -597,8 +597,8 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
          * @param customTime Current time value that might be one of the
          *            predefined values or a totaly custom value
          */
-        public TimeSpinnerAdapter(int timesArrayResource, boolean defaul, Integer customTime) {
-            this(timesArrayResource, defaul);
+        public TimeSpinnerAdapter(int timeNamesResource, int timeValuesResource, boolean defaul, Integer customTime) {
+            this(timeNamesResource, timeValuesResource, defaul);
 
             // Check if we also need to add the custom value entry
             if (getTimePosition(customTime) == -1)
@@ -653,7 +653,7 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
     class ColorSpinnerAdapter extends BaseAdapter implements SpinnerAdapter {
         private ArrayList<Pair<String, Integer>> colors;
 
-        public ColorSpinnerAdapter(int colorsArrayResource, boolean defaul) {
+        public ColorSpinnerAdapter(int colorNamesResource, int colorValuesResource, boolean defaul) {
             colors = new ArrayList<Pair<String, Integer>>();
 
             if (defaul) {
@@ -662,14 +662,11 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
                         R.string.default_color), Application.DEFAULT_COLOR));
             }
 
-            for (String entry : getResources().getStringArray(colorsArrayResource)) {
-                String[] values = entry.split("\\|", -1);
+            String[] color_names = getResources().getStringArray(R.array.color_names);
+            String[] color_values = getResources().getStringArray(R.array.color_values);
 
-                if (values.length != 2)
-                    continue;
-
-                colors.add(new Pair<String, Integer>(values[0], Integer.decode(values[1])));
-            }
+            for(int i = 0; i < color_values.length; ++i)
+                colors.add(new Pair<String, Integer>(color_names[i], Integer.decode(color_values[i])));
         }
 
         /**
@@ -682,8 +679,8 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
          * @param customColor Current color value that might be one of the
          *            predefined values or a totaly custom value
          */
-        public ColorSpinnerAdapter(int colorsArrayResource, boolean defaul, Integer customColor) {
-            this(colorsArrayResource, defaul);
+        public ColorSpinnerAdapter(int colorNamesResource, int colorValuesResource, boolean defaul, Integer customColor) {
+            this(colorNamesResource, colorValuesResource, defaul);
 
             if (getColorPosition(customColor) == -1)
                 colors.add(new Pair<String, Integer>(getResources()

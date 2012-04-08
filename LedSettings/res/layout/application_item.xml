@@ -26,27 +26,6 @@
             android:textAppearance="?android:attr/textAppearanceSmall" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingRight="5dp" >
-
-        <TextView
-            android:id="@+id/textViewTimeOnValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        <TextView
-            android:id="@+id/textViewTimeOffValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-    </LinearLayout>
-
     <View
         android:id="@+id/textViewColorValue"
         android:layout_width="10dp"

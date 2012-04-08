@@ -15,7 +15,6 @@
         android:id="@+id/spinnerTimeOn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:entries="@array/times"
         android:padding="4dp" />
 
     <TextView
@@ -28,7 +27,6 @@
         android:id="@+id/spinnerTimeOff"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:entries="@array/times"
         android:padding="4dp" />
 
     <TextView
@@ -41,7 +39,6 @@
         android:id="@+id/spinnerColors"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:entries="@array/colors"
         android:padding="4dp" />
 
 </LinearLayout>
