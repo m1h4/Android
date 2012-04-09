@@ -374,18 +374,6 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 	}
 
 	@Override
-	public void onResume()
-	{
-		super.onResume();
-
-		if(mReceiver != null)
-		{
-			unregisterReceiver(mReceiver);
-			mReceiver = null;
-		}
-	}
-
-	@Override
 	public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3)
 	{
 		final Application item = (Application) getListView().getItemAtPosition(position);
@@ -423,7 +411,24 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 
 				builder.setTitle("Test");
 				builder.setMessage("Turn the phone screen off to see the selected notification in action.");
-				builder.setPositiveButton(android.R.string.ok, null);
+				builder.setPositiveButton(android.R.string.ok, new AlertDialog.OnClickListener()
+				{
+					@Override
+					public void onClick(DialogInterface arg0, int arg1)
+					{
+						LedSettingsActivity.this.unregisterReceiver(mReceiver);
+						mReceiver = null;
+					}
+				});
+				builder.setOnCancelListener(new AlertDialog.OnCancelListener()
+				{
+					@Override
+					public void onCancel(DialogInterface arg0)
+					{
+						LedSettingsActivity.this.unregisterReceiver(mReceiver);
+						mReceiver = null;
+					}
+				});
 				builder.show();
 			}
 		});
