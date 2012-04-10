@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
-import com.mihovilic.android.led.settings.LedSettingsActivity.ApplicationAdapter;
-import com.mihovilic.android.led.settings.LedSettingsActivity.ScreenReceiver;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -40,7 +36,6 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Switch;
-import android.widget.Button;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.view.LayoutInflater;
@@ -404,31 +399,15 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 				if(mReceiver != null) LedSettingsActivity.this.unregisterReceiver(mReceiver);
 
 				mReceiver = new ScreenReceiver(item.timeon, item.timeoff, item.color);
-
-				LedSettingsActivity.this.registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+				IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+				filter.addAction(Intent.ACTION_SCREEN_ON);
+				LedSettingsActivity.this.registerReceiver(mReceiver, filter);
 				
 				AlertDialog.Builder builder = new AlertDialog.Builder(LedSettingsActivity.this);
 
 				builder.setTitle("Test");
 				builder.setMessage("Turn the phone screen off to see the selected notification in action.");
-				builder.setPositiveButton(android.R.string.ok, new AlertDialog.OnClickListener()
-				{
-					@Override
-					public void onClick(DialogInterface arg0, int arg1)
-					{
-						LedSettingsActivity.this.unregisterReceiver(mReceiver);
-						mReceiver = null;
-					}
-				});
-				builder.setOnCancelListener(new AlertDialog.OnCancelListener()
-				{
-					@Override
-					public void onCancel(DialogInterface arg0)
-					{
-						LedSettingsActivity.this.unregisterReceiver(mReceiver);
-						mReceiver = null;
-					}
-				});
+				builder.setPositiveButton(android.R.string.ok, null);
 				builder.show();
 			}
 		});
@@ -1003,11 +982,24 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 		{
 			if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF))
 			{
-				Notification.Builder builder = new Notification.Builder(getApplicationContext());
+				Notification.Builder builder = new Notification.Builder(LedSettingsActivity.this);
 
+				builder.setAutoCancel(true);
 				builder.setLights(color, timeon, timeoff);
 
 				((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(0, builder.getNotification());
+				
+			}
+			else if(intent.getAction().equals(Intent.ACTION_SCREEN_ON))
+			{
+				((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).cancel(0);
+				
+				LedSettingsActivity.this.runOnUiThread(new Runnable() {
+				    public void run() {
+				        unregisterReceiver(mReceiver);
+				        mReceiver = null;
+				    }
+				});
 			}
 
 		}
