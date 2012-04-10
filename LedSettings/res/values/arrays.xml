@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    
+    <string-array name="package_mapping">
+        <item>com.android.pero-com.android.tomo</item>
+        <item>com.pero.znak-com.tomo.znak</item>
+    </string-array>
 
      <string-array name="color_names">
         <item>Alice Blue</item>

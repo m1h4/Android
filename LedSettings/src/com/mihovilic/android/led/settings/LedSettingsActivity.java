@@ -2,8 +2,10 @@ package com.mihovilic.android.led.settings;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.mihovilic.android.led.settings.LedSettingsActivity.ApplicationAdapter;
 import com.mihovilic.android.led.settings.LedSettingsActivity.ScreenReceiver;
@@ -27,6 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.AdapterView;
@@ -84,6 +87,8 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 	private int mColor;
 
 	private ScreenReceiver mReceiver = null;
+	
+	private Map<String, String> mPackageNameMappings = new HashMap<String, String>(); 
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -114,6 +119,23 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 		refreshDefault();
 		refreshCustomEnabled();
 		refreshCustomApplications();
+		
+		for(String mapping : getResources().getStringArray(R.array.package_mapping))
+		{
+			String[] map = mapping.split("-");
+			mPackageNameMappings.put(map[0], map[1]);
+		}
+        
+		Log.d("test", "pero->" + mapPackage("pero"));
+		Log.d("test", "com.android.pero->" + mapPackage("com.android.pero"));
+	}
+	
+	private String mapPackage(String pkg)
+	{
+		if(!mPackageNameMappings.containsKey(pkg))
+			return pkg;
+		
+		return mPackageNameMappings.get(pkg);
 	}
 
 	private void refreshCustomEnabled()
@@ -404,31 +426,15 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 				if(mReceiver != null) LedSettingsActivity.this.unregisterReceiver(mReceiver);
 
 				mReceiver = new ScreenReceiver(item.timeon, item.timeoff, item.color);
-
-				LedSettingsActivity.this.registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+				IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+				filter.addAction(Intent.ACTION_SCREEN_ON);
+				LedSettingsActivity.this.registerReceiver(mReceiver, filter);
 				
 				AlertDialog.Builder builder = new AlertDialog.Builder(LedSettingsActivity.this);
 
 				builder.setTitle("Test");
 				builder.setMessage("Turn the phone screen off to see the selected notification in action.");
-				builder.setPositiveButton(android.R.string.ok, new AlertDialog.OnClickListener()
-				{
-					@Override
-					public void onClick(DialogInterface arg0, int arg1)
-					{
-						LedSettingsActivity.this.unregisterReceiver(mReceiver);
-						mReceiver = null;
-					}
-				});
-				builder.setOnCancelListener(new AlertDialog.OnCancelListener()
-				{
-					@Override
-					public void onCancel(DialogInterface arg0)
-					{
-						LedSettingsActivity.this.unregisterReceiver(mReceiver);
-						mReceiver = null;
-					}
-				});
+				builder.setPositiveButton(android.R.string.ok, null);
 				builder.show();
 			}
 		});
@@ -1003,13 +1009,25 @@ public class LedSettingsActivity extends ListActivity implements OnItemClickList
 		{
 			if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF))
 			{
-				Notification.Builder builder = new Notification.Builder(getApplicationContext());
+				Notification.Builder builder = new Notification.Builder(LedSettingsActivity.this);
 
+				builder.setAutoCancel(true);
 				builder.setLights(color, timeon, timeoff);
 
 				((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(0, builder.getNotification());
+				
 			}
-
+			else if(intent.getAction().equals(Intent.ACTION_SCREEN_ON))
+			{
+				((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).cancel(0);
+				
+				LedSettingsActivity.this.runOnUiThread(new Runnable() {
+				    public void run() {
+				        unregisterReceiver(mReceiver);
+				        mReceiver = null;
+				    }
+				});
+			}
 		}
 
 	}
